@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import { sendTelegramLog } from './telegramNotifier.js'
+import { sendTelegramLog } from './telegramNotifier.ts'
 import { settings } from '../config/setting.js'
 
 const OWNER_ID = process.env.TELEGRAM_OWNER_ID
