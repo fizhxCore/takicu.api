@@ -1,5 +1,6 @@
 import type { Context, Next } from 'hono'
 import { settings } from '../config/setting.js'
+import { isDynamicApiKey } from './apiKeyStore.ts'
 
 export const apiKeyAuth = async (c: Context, next: Next) => {
     // Lewati cek apikey untuk endpoint OpenAPI spec, dokumentasi, & webhook internal
@@ -19,7 +20,11 @@ export const apiKeyAuth = async (c: Context, next: Next) => {
         }, 401)
     }
 
-    if (!settings.validApiKeys.includes(apiKey)) {
+    // Cek key statis (settings.js) dulu karena instan, baru cek key dinamis
+    // (dibuat lewat bot Telegram, disimpen di Redis) kalau nggak ketemu di situ
+    const isValid = settings.validApiKeys.includes(apiKey) || await isDynamicApiKey(apiKey)
+
+    if (!isValid) {
         return c.json({
             status: false,
             error: 'Forbidden',
