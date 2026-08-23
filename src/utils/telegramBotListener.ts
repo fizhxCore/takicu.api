@@ -1,6 +1,7 @@
 import type { Context } from 'hono'
 import { sendTelegramLog } from './telegramNotifier.ts'
 import { settings } from '../config/setting.js'
+import { generateApiKey, addApiKey, listApiKeys, revokeApiKey, isRedisConfigured } from './apiKeyStore.ts'
 
 const OWNER_ID = process.env.TELEGRAM_OWNER_ID
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET
@@ -23,6 +24,8 @@ export function getHitStats() {
     }
 }
 
+const NO_REDIS_MSG = `⚠️ Fitur API key dinamis butuh Redis (Upstash) yang belum ke-setup di project ini. Cek README bagian "API Key Dinamis via Bot" buat cara pasangnya (gratis, cuma beberapa menit).`
+
 // Proses satu command dari owner (dipanggil dari webhook, bukan polling lagi —
 // polling loop (while true) nggak kompatibel sama serverless/Vercel karena
 // function-nya cuma hidup sebentar per-request, nggak bisa nahan koneksi lama)
@@ -30,7 +33,9 @@ async function handleOwnerCommand(message) {
     if (!message || !message.chat || String(message.chat.id) !== String(OWNER_ID) || !message.text) return
 
     const command = message.text.trim()
-    if (command === '/stats' || command === '/status') {
+    const [cmd, ...args] = command.split(/\s+/)
+
+    if (cmd === '/stats' || cmd === '/status') {
         const stats = getHitStats()
         const replyMsg = `<b>📊 ${settings.name} Live Status</b>
 -------------------------------
@@ -38,8 +43,28 @@ async function handleOwnerCommand(message) {
 <b>Server Uptime:</b> <code>${stats.uptime}</code>
 <b>Status:</b> 🟢 ONLINE & Healthy`
         await sendTelegramLog(replyMsg)
-    } else if (command === '/ping') {
+    } else if (cmd === '/ping') {
         await sendTelegramLog(`🏓 <b>Pong!</b> Server ${settings.name} is active.`)
+    } else if (cmd === '/newkey') {
+        if (!isRedisConfigured()) return sendTelegramLog(NO_REDIS_MSG)
+        const key = generateApiKey()
+        const ok = await addApiKey(key)
+        await sendTelegramLog(ok
+            ? `✅ <b>API Key baru dibuat:</b>\n<code>${key}</code>\n\nLangsung bisa dipakai buat akses ${settings.apiUrl}.`
+            : `❌ Gagal nyimpen key baru, coba lagi sebentar lagi.`)
+    } else if (cmd === '/listkeys') {
+        if (!isRedisConfigured()) return sendTelegramLog(NO_REDIS_MSG)
+        const keys = await listApiKeys()
+        const list = keys.length ? keys.map(k => `• <code>${k}</code>`).join('\n') : '(belum ada key dinamis)'
+        await sendTelegramLog(`<b>🔑 API Key Dinamis Aktif</b>\n${list}\n\n<i>Key statis di settings.js nggak ditampilkan di sini.</i>`)
+    } else if (cmd === '/revokekey') {
+        if (!isRedisConfigured()) return sendTelegramLog(NO_REDIS_MSG)
+        const target = args[0]
+        if (!target) return sendTelegramLog('Format: <code>/revokekey tkc_xxxxx</code>')
+        const removed = await revokeApiKey(target)
+        await sendTelegramLog(removed
+            ? `✅ Key <code>${target}</code> berhasil dicabut.`
+            : `❌ Key nggak ketemu (mungkin udah dicabut sebelumnya, atau itu key statis yang emang nggak bisa dicabut lewat sini).`)
     }
 }
 
