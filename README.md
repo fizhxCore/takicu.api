@@ -189,6 +189,33 @@ register(app, quoteRoute, quoteHandler)
 
 ---
 
+## 🗝️ API KEY DINAMIS VIA BOT (OPSIONAL)
+
+Selain API key statis di `src/config/setting.js`, proyek ini bisa bikin & cabut API key
+langsung dari chat Telegram — cocok kalau mau bagi-bagiin key ke orang lain tanpa harus
+edit kode & redeploy tiap kali. Key dinamis ini disimpen di Redis (Vercel KV sudah tidak
+tersedia lagi per akhir 2024, jadi lewat **Upstash Redis** dari Vercel Marketplace).
+
+### Setup (sekali saja, ~2 menit, ada tier gratisnya):
+1. Buka dashboard project kamu di Vercel → tab **Storage** → **Create Database**
+2. Pilih **Upstash** → **Redis** (biarin Vercel yang urus akun Upstash-nya, paling gampang)
+3. Setelah dibuat, hubungkan database itu ke project `takicu-api` kamu — env var
+   `KV_REST_API_URL` & `KV_REST_API_TOKEN` (atau `UPSTASH_REDIS_REST_*`) otomatis ke-inject
+4. **Redeploy** project-nya (env var baru cuma kepakai setelah redeploy)
+
+### Command bot yang tersedia (chat langsung ke bot kamu, cuma owner yang bisa pakai):
+| Command | Fungsi |
+| :--- | :--- |
+| `/newkey` | Generate 1 API key baru & simpen ke Redis, langsung aktif |
+| `/listkeys` | Lihat semua API key dinamis yang lagi aktif |
+| `/revokekey <key>` | Cabut/nonaktifin 1 API key dinamis |
+
+> 💡 Key statis (`settings.validApiKeys`) nggak kena pengaruh sama sekali & nggak bisa
+> dicabut lewat bot — dua sistem ini jalan berdampingan. Kalau Redis belum di-setup,
+> ketiga command di atas bakal balas kasih tau caranya, bukan error diam-diam.
+
+---
+
 ## 🔑 CARA PENGGUNAAN API (QUICK START)
 
 Seluruh endpoint API yang berada di bawah rute `/api/*` memerlukan query parameter `apikey`:
