@@ -3,10 +3,10 @@ import { settings } from '../config/setting.js'
 import { isDynamicApiKey } from './apiKeyStore.ts'
 
 export const apiKeyAuth = async (c: Context, next: Next) => {
-    // Lewati cek apikey untuk endpoint OpenAPI spec, dokumentasi, & webhook internal
-    // (webhook Telegram punya verifikasi sendiri lewat secret token, bukan apikey)
+    // Lewati cek apikey untuk endpoint OpenAPI spec, dokumentasi, webhook internal,
+    // & redirect shortlink (itu diklik orang lain, bukan cuma pemilik apikey)
     const path = c.req.path
-    if (path === '/openapi.json' || path.startsWith('/docs') || path === '/api/telegram-webhook') {
+    if (path === '/openapi.json' || path.startsWith('/docs') || path === '/api/telegram-webhook' || path.startsWith('/api/s/')) {
         return await next()
     }
 
