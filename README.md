@@ -216,6 +216,23 @@ tersedia lagi per akhir 2024, jadi lewat **Upstash Redis** dari Vercel Marketpla
 
 ---
 
+## 📚 DAFTAR ENDPOINT
+
+| Endpoint | Kategori | Keterangan |
+| :--- | :--- | :--- |
+| `GET /api/stats` | System | Info sistem server (uptime, platform, dll) |
+| `GET /api/random/cosplay` | Random | Gambar cosplay acak |
+| `GET /api/random/quotes` | Random | Kata-kata/peribahasa Indonesia acak |
+| `GET /api/downloader/tiktok` | Downloader | Download video TikTok tanpa watermark |
+| `GET /api/downloader/instagram` | Downloader | Download foto/reels Instagram |
+| `GET /api/tools/qrcode` | Tools | Generate QR code (self-hosted, gambar PNG) |
+| `GET /api/tools/shorten` | Tools | Bikin short link (butuh Redis) |
+| `GET /api/s/{code}` | Tools | Redirect short link (publik, tanpa apikey) |
+
+Detail lengkap tiap parameter & contoh coba-langsung ada di halaman `/docs` setelah server jalan.
+
+---
+
 ## 🔑 CARA PENGGUNAAN API (QUICK START)
 
 Seluruh endpoint API yang berada di bawah rute `/api/*` memerlukan query parameter `apikey`:
