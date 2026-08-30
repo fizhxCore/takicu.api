@@ -6,7 +6,11 @@ import { settings } from './config/setting.js'
 // --------- API ROUTES ---------
 import { statsRoute, statsHandler } from './api/stats/routes.ts'
 import { cosplayRoute, cosplayHandler } from './api/random/cosplay.ts'
+import { quotesRoute, quotesHandler } from './api/random/quotes.ts'
 import { tiktokRoute, tiktokHandler } from './api/downloader/tiktok.ts'
+import { instagramRoute, instagramHandler } from './api/downloader/instagram.ts'
+import { qrcodeRoute, qrcodeHandler } from './api/tools/qrcode.ts'
+import { shortenRoute, shortenHandler, shortlinkRedirectRoute, shortlinkRedirectHandler } from './api/tools/shortlink.ts'
 
 // --------- UTILS ---------
 import { logApiRequest } from './utils/logApiRequest.ts'
@@ -29,7 +33,12 @@ app.use('/api/*', apiKeyAuth)
 // --------- REGISTER ROUTES ---------
 register(app, statsRoute, statsHandler)
 register(app, cosplayRoute, cosplayHandler)
+register(app, quotesRoute, quotesHandler)
 register(app, tiktokRoute, tiktokHandler)
+register(app, instagramRoute, instagramHandler)
+register(app, qrcodeRoute, qrcodeHandler)
+register(app, shortenRoute, shortenHandler)
+register(app, shortlinkRedirectRoute, shortlinkRedirectHandler)
 
 // Webhook internal buat command Telegram (/stats, /ping). Sengaja di bawah
 // /api/* (bukan di luar) karena di Next.js/Vercel cuma path /api/* yang
