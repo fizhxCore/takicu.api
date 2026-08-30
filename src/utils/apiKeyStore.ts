@@ -32,6 +32,12 @@ export function isRedisConfigured(): boolean {
     return getRedis() !== null
 }
 
+// Diekspor biar fitur lain (misal shortlink) bisa pakai koneksi Redis yang
+// sama tanpa duplikasi logic getRedis() di banyak tempat
+export function getRedisClient(): Redis | null {
+    return getRedis()
+}
+
 export function generateApiKey(): string {
     return `tkc_${randomBytes(12).toString('hex')}`
 }
